@@ -11,14 +11,6 @@ This project implements a chatbot with sentiment analysis capabilities, built us
 - **Robust Error Handling**: Handles empty inputs, keyboard interrupts, file I/O errors, and missing dependencies gracefully.
 - **Python 3.12 Compatibility**: Ensures compatibility with Python 3.12, with a version checkpoint at startup.
 
-## Requirements
-
-- **Python**: Version 3.12 or later.
-- **Dependencies** (Listed in 'requirements.txt'):
-  - 'nltk==3.8.1'
-  - 'textblob==0.18.0.post0'
-  - 'langdetect==1.0.9'
-
 ## Installation
 
 ### 1. Install Python 3.12:

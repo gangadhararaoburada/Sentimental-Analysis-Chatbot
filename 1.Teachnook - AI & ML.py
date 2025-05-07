@@ -7,6 +7,8 @@ import sys
 import random
 import langdetect
 from langdetect import detect
+import json
+from datetime import datetime
 
 # Ensure Python 3.12 or later
 if sys.version_info < (3, 12):
@@ -27,6 +29,8 @@ except LookupError:
     except Exception as e:
         print(f"Error: Failed to download NLTK 'punkt' tokenizer: {e}")
         sys.exit(1)
+
+CHAT_HISTORY_FILE = "chat_history.json"
 
 class Chatbot:
     def __init__(self):
@@ -55,6 +59,35 @@ class Chatbot:
             "Keeping it steady, I see!",
             "All good, what's next?"
         ]
+        # Initialize JSON file
+        self._initialize_json_file()
+
+    def _initialize_json_file(self):
+        try:
+            with open(CHAT_HISTORY_FILE, 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+        except Exception as e:
+            print(f"Error initializing JSON file: {e}")
+            return []
+
+    def _save_interaction(self, user_input, sentiment, polarity, subjectivity, response):
+        interaction = {
+            "timestamp": datetime.now().isoformat(),
+            "user_input": user_input,
+            "sentiment": sentiment,
+            "polarity": polarity,
+            "subjectivity": subjectivity,
+            "response": response
+        }
+        history = self._initialize_json_file()
+        history.append(interaction)
+        try:
+            with open(CHAT_HISTORY_FILE, 'w') as f:
+                json.dump(history, f, indent=4)
+        except Exception as e:
+            print(f"Error saving to JSON file: {e}")
 
     def get_sentiment(self, text):
         try:
@@ -78,44 +111,61 @@ class Chatbot:
                 user_input = input("You: ").strip().lower()
 
                 if not user_input:
-                    print(f"{self.bot_name}: Please say something!")
+                    response = "Please say something!"
+                    print(f"{self.bot_name}: {response}")
+                    self._save_interaction(user_input, "error", 0, 0, response)
                     continue
 
                 if user_input in self.goodbyes:
-                    print(f"{self.bot_name}: Goodbye!")
+                    response = "Goodbye!"
+                    print(f"{self.bot_name}: {response}")
+                    self._save_interaction(user_input, "neutral", 0, 0, response)
                     break
 
                 if user_input in self.greetings:
-                    print(f"{self.bot_name}: Hello! How can I assist you?")
+                    response = "Hello! How can I assist you?"
+                    print(f"{self.bot_name}: {response}")
+                    self._save_interaction(user_input, "neutral", 0, 0, response)
                     continue
 
                 # Check for non-English input
                 try:
                     if detect(user_input) != 'en':
-                        print(f"{self.bot_name}: I work best with English input. Results may be less accurate for other languages.")
+                        non_english_warning = "I work best with English input. Results may be less accurate for other languages."
+                        print(f"{self.bot_name}: {non_english_warning}")
                 except langdetect.lang_detect_exception.LangDetectException:
+                    non_english_warning = ""
                     pass  # Ignore detection errors for short or ambiguous text
 
                 sentiment, polarity, subjectivity = self.get_sentiment(user_input)
 
                 if sentiment == "error":
-                    print(f"{self.bot_name}: Sorry, I couldn't analyze that input.")
+                    response = "Sorry, I couldn't analyze that input."
+                    print(f"{self.bot_name}: {response}")
+                    self._save_interaction(user_input, sentiment, polarity, subjectivity, response)
                 else:
-                    print(f"{self.bot_name}: You expressed a {sentiment} sentiment.")
-                    print(f"{self.bot_name}: Polarity: {polarity:.2f}, Subjectivity: {subjectivity:.2f}")
-                    # Select a random response based on sentiment
-                    if sentiment == "positive":
-                        print(f"{self.bot_name}: {random.choice(self.positive_responses)}")
-                    elif sentiment == "negative":
-                        print(f"{self.bot_name}: {random.choice(self.negative_responses)}")
-                    else:
-                        print(f"{self.bot_name}: {random.choice(self.neutral_responses)}")
+                    sentiment_message = f"You expressed a {sentiment} sentiment."
+                    metrics_message = f"Polarity: {polarity:.2f}, Subjectivity: {subjectivity:.2f}"
+                    varied_response = random.choice(
+                        self.positive_responses if sentiment == "positive" else
+                        self.negative_responses if sentiment == "negative" else
+                        self.neutral_responses
+                    )
+                    print(f"{self.bot_name}: {sentiment_message}")
+                    print(f"{self.bot_name}: {metrics_message}")
+                    print(f"{self.bot_name}: {varied_response}")
+                    response = f"{non_english_warning}\n{sentiment_message}\n{metrics_message}\n{varied_response}".strip()
+                    self._save_interaction(user_input, sentiment, polarity, subjectivity, response)
 
             except KeyboardInterrupt:
-                print(f"\n{self.bot_name}: Goodbye!")
+                response = "Goodbye!"
+                print(f"\n{self.bot_name}: {response}")
+                self._save_interaction("", "neutral", 0, 0, response)
                 break
             except Exception as e:
-                print(f"{self.bot_name}: Oops, something went wrong. Please try again.")
+                response = "Oops, something went wrong. Please try again."
+                print(f"{self.bot_name}: {response}")
+                self._save_interaction(user_input if 'user_input' in locals() else "", "error", 0, 0, response)
 
 if __name__ == "__main__":
     try:

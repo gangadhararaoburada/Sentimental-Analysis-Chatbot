@@ -46,13 +46,13 @@ pip install -r requirements.txt
 
 ### 5. Run the Chatbot:
 '''bash
-python chatbot.py
+python Sentiment_Analysis_Chatbot.py
 '''
 
 ## Usage
 
 ### Start the Chatbot:
-Run 'chatbot.py' to launch the chatbot. It will display the Python version and compatibility status:
+Run 'Sentiment_Analysis_Chatbot.py' to launch the chatbot. It will display the Python version and compatibility status:
 '''text
 Running on Python 3.12.1
 This version is compatible and supported.

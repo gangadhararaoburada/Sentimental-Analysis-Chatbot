@@ -142,7 +142,6 @@ All interactions are saved in 'chat_history.json' in the project directory. Exam
   - Ensure sufficient disk space and access
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Contact
 For questions or contributions, please open an issue or submit a pull request on the project repository.

@@ -33,7 +33,7 @@ def log_and_print(message, level='info'):
         logging.warning(message)
 
 # Print Python version and compatibility status
-print(f"Running on Python [ {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro} ]")
+log_and_print(f"Running on Python [ {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro} ]")
 if sys.version_info >= (3, 12):
     log_and_print("     - This version is compatible and supported for the execution of the code.")
 else:
